@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package beverage.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/dietzy1/børsbar/backend/protos/beverage/v1;beveragev1";
+
+//What services do I actually need to implement
+
+service BeverageService {
+
+ 
+
+
+/*     option (google.api.http) = {
+        post: "/messagegateway.v1.MessageGatewayService/GetMessages",
+        body: "*",
+      }; */
+
+}
+
+message Beverage {
+    string id = 1;
+    string price = 2;
+    string name = 3;
+    int64 percentage_change = 4;
+    BeverageType type = 5;
+    Status status = 6;
+}
+
+
+enum BeverageType {
+    BEVERAGE_TYPE_BEER_UNSPECIFIED = 0;
+    BEVERAGE_TYPE_COCKTAIL = 1;
+    BEVERAGE_TYPE_SHOTS = 2;
+}
+
+enum Status {
+    STATUS_INCREASING_UNSPECIFIED = 0;
+    STATUS_DECREASING = 1;
+    STATUS_NO_CHANGE = 2;
+}
+
+
+//Admin service for bartenders where they are able to start/stop the timer for an event
+//Admin service for bartenders where they are able to make requests to increase price of a drink
+
+//Websocket service for customers which manages streaming of price data and drink data to the users
+
+
+
+//Product service
+
+//Price service
+
+//drinks service
+
+//event service
+
+//usermanagement service
+
+
+

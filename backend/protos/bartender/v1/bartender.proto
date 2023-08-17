@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package bartender.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/dietzy1/børsbar/backend/protos/bartender/v1;bartenderv1";
+
+service BartenderService {
+    
+}
+
+//I only need to add functionality for one bartender to be created
