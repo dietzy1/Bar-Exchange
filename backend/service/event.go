@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
 )
@@ -18,10 +19,18 @@ type eventService struct {
 }
 
 type eventStore interface {
+	StartEvent(ctx context.Context, req Event) (Event, error)
+	StopEvent(ctx context.Context, req Event) (Event, error)
+	GetEvent(ctx context.Context, req Event) (Event, error)
 }
 
-func newEventService(store eventStore, logger *zap.Logger) *eventService {
-	return &eventService{store: store}
+func NewEventService(store eventStore, logger *zap.Logger) (*eventService, error) {
+
+	if store == nil {
+		return nil, fmt.Errorf("EventStore is nil")
+	}
+
+	return &eventService{store: store, logger: logger}, nil
 }
 
 func (s *eventService) StartEvent(ctx context.Context, req Event) (Event, error) {
