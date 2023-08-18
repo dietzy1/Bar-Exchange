@@ -1,8 +1,10 @@
 package server
 
 import (
+	"context"
 	"io"
 	"net"
+	"net/http"
 	"os"
 
 	"go.uber.org/zap"
@@ -14,7 +16,8 @@ import (
 
 type server struct {
 	pb.UnimplementedEventServiceServer
-	grpc *grpc.Server
+	grpc     *grpc.Server
+	gwServer *http.Server
 
 	logger *zap.Logger
 	config *Config
@@ -24,15 +27,21 @@ type server struct {
 }
 
 type Config struct {
-	Addr   string
-	Logger *zap.Logger
+	Addr        string
+	GatewayAddr string
+	Logger      *zap.Logger
 }
 
 func New(c *Config, event event) *server {
 
 	if c.Addr == "" {
-		c.Addr = ":9000"
+		c.Addr = ":8000"
 		c.Logger.Info("No port specified, defaulting to 9000")
+	}
+
+	if c.Addr == "" {
+		c.GatewayAddr = ":9000"
+		c.Logger.Info("No gateway port specified, defaulting to 9000")
 	}
 
 	//Unsure if this is even supposed to be here honestly
@@ -48,11 +57,11 @@ func New(c *Config, event event) *server {
 		grpc:   grpc,
 		logger: c.Logger,
 		config: c,
-		tester: tester,
+		event:  event,
 	}
 
 	//Register the server object methods with the GRPC server
-	pb.RegisterTesterServiceServer(grpc, s)
+	pb.RegisterEventServiceServer(grpc, s)
 
 	return s
 }
@@ -72,12 +81,11 @@ func (s *server) ListenAndServe() error {
 		return err
 	}
 
-	//Here I want to call the gateway server
-
 	return nil
 }
 
-func (s *server) Stop() {
+func (s *server) Stop(ctx context.Context) {
 	s.grpc.GracefulStop()
+	s.gwServer.Shutdown(ctx)
 	s.logger.Info("gRPC server stopped gracefully")
 }

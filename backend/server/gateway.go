@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -15,13 +13,13 @@ import (
 )
 
 // run the generated GRPC gateway server
-func runGateway(logger *zap.Logger) error {
+func (s *server) RunGateway() error {
 
 	//The reverse proxy connects to the GRPC server
 	conn, err := grpc.DialContext(
 		context.Background(),
 		/* "dns:///0.0.0.0:8080", */
-		"dns:///0.0.0.0"+os.Getenv("GRPC"),
+		"dns:///0.0.0.0"+s.config.Addr,
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -29,23 +27,25 @@ func runGateway(logger *zap.Logger) error {
 		return fmt.Errorf("failed to dial: %v", err)
 	}
 
-	//Main mux where options are added in
+	//Main mux where options are added in -- no options are needed for now
 	gwmux := runtime.NewServeMux()
 
-	//middleware chaining
-
-	middleware := corsMiddleware(gwmux)
-	loggingMiddleware(middleware, logger)
-
-	//middleware := logger(cors(gwmux))
-
-	gwServer := &http.Server{
-		Addr:    gatewayAddress,
-		Handler: middleware,
+	//Call function which handles registering services to the gateway
+	if err := registerGateway(context.Background(), gwmux, conn); err != nil {
+		return err
 	}
 
-	log.Info("Serving gRPC-Gateway", gatewayAddress)
-	log.Fatalln(gwServer.ListenAndServe())
+	gwServer := &http.Server{
+		Addr:    s.config.GatewayAddr,
+		Handler: corsMiddleware(gwmux),
+	}
+	//Assign to server struct so we can gracefully shutdown
+	s.gwServer = gwServer
+
+	fmt.Println("Starting gateway server on port:", s.config.GatewayAddr)
+	if err := gwServer.ListenAndServe(); err != nil {
+		return fmt.Errorf("failed to listen and serve: %v", err)
+	}
 
 	return nil
 }
