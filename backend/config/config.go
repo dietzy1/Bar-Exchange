@@ -16,7 +16,8 @@ type Config struct {
 	DBTimeout int
 
 	//Server settings
-	ServerPort string
+	ServerPort  string
+	GatewayPort string
 }
 
 // Instantiate a new configuration -- reads from .env file
@@ -39,10 +40,16 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("failed to get SERVER_PORT: %v", err)
 	}
 
+	gatewayPort, err := stringEnvVar("GATEWAY_PORT")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get GATEWAY_PORT: %v", err)
+	}
+
 	return &Config{
-		DBURI:      dbURI,
-		DBTimeout:  dbTimeout,
-		ServerPort: serverPort,
+		DBURI:       dbURI,
+		DBTimeout:   dbTimeout,
+		ServerPort:  serverPort,
+		GatewayPort: gatewayPort,
 	}, nil
 }
 
@@ -55,6 +62,7 @@ func readEnvfile() {
 			log.Println("Loaded .env file")
 			return
 		}
+		fmt.Println(cwdEnvPath)
 	}
 	err = godotenv.Load("../../.env")
 	if err != nil {
