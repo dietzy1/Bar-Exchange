@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+const datastore = "Bar-Exchange"
+
 type db struct {
 	client *mongo.Client
 }
