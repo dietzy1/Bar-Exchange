@@ -14,20 +14,52 @@ type event interface {
 }
 
 func (s *server) StartEvent(ctx context.Context, req *pb.StartEventRequest) (*pb.StartEventResponse, error) {
-	/* res, err := s.event.StartEvent(ctx, req)
+
+	input := service.Event{
+		FutureTimeStamp: req.FutureTimestamp,
+	}
+
+	res, err := s.event.StartEvent(ctx, input)
 	if err != nil {
 		return nil, err
-	} */
-	return nil, nil
+	}
+
+	return &pb.StartEventResponse{
+		Id:       res.Id,
+		Duration: 30,
+	}, nil
 
 }
 
 func (s *server) StopEvent(ctx context.Context, req *pb.StopEventRequest) (*pb.StopEventResponse, error) {
-	//return s.event.StopEvent(ctx, req)
-	return nil, nil
+
+	input := service.Event{
+		Id: req.Id,
+	}
+
+	_, err := s.event.StopEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.StopEventResponse{}, nil
+
 }
 
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
 	//return s.event.GetEvent(ctx, req)
-	return nil, nil
+	input := service.Event{
+		Id: req.Id,
+	}
+
+	res, err := s.event.GetEvent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetEventResponse{
+		Id:              res.Id,
+		FutureTimestamp: res.FutureTimeStamp,
+	}, nil
+
 }

@@ -30,7 +30,7 @@ rpc StartEvent(StartEventRequest) returns (StartEventResponse) {
 }
 
 message StartEventRequest {
-int64 duration = 1;
+string future_timestamp = 1;
 }
 
 message StartEventResponse {
@@ -51,5 +51,5 @@ message GetEventRequest {
 
 message GetEventResponse {
  string id = 1;
- int64 duration = 2;
+ string future_timestamp = 2;
 }
