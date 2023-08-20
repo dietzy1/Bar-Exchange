@@ -37,3 +37,17 @@ func (d *db) GetEvent(ctx context.Context, req service.Event) (service.Event, er
 
 	return event, nil
 }
+
+func (d *db) GetEvents(ctx context.Context, req service.Event) ([]service.Event, error) {
+
+	var events []service.Event
+	cursor, err := d.client.Database(datastore).Collection(eventCollection).Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	if err := cursor.All(ctx, &events); err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}

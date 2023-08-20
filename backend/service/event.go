@@ -43,12 +43,27 @@ type eventStore interface {
 	StartEvent(ctx context.Context, req Event) (Event, error)
 	StopEvent(ctx context.Context, req Event) (Event, error)
 	GetEvent(ctx context.Context, req Event) (Event, error)
+	GetEvents(ctx context.Context, req Event) ([]Event, error)
 }
 
 func NewEventService(store eventStore, logger *zap.Logger) (*eventService, error) {
 
 	if store == nil {
 		return nil, fmt.Errorf("EventStore is nil")
+	}
+
+	//use store object to check if there is an ongoing event -- To ensure fault tolerance
+	events, err := store.GetEvents(context.TODO(), Event{})
+	if err != nil {
+		logger.Info("No current event")
+	}
+	//If a current event exists call into startEvent
+	if len(events) > 0 {
+		logger.Info("Current event exists")
+		_, err := store.StartEvent(context.TODO(), Event{events[0].Id, events[0].FutureTimeStamp})
+		if err != nil {
+			logger.Info("Error starting event", zap.Error(err))
+		}
 	}
 
 	return &eventService{store: store, logger: logger, mu: sync.RWMutex{}}, nil
@@ -65,7 +80,27 @@ func (s *eventService) StartEvent(ctx context.Context, req Event) (Event, error)
 	}
 	s.logger.Info("timestamp", zap.String("timestamp", timestamp.String()))
 
-	// Create a stop channel for the event
+	//We need a function which checks if the timestamp is in the past
+	if timestamp.Before(time.Now()) {
+		return Event{}, fmt.Errorf("timestamp is in the past")
+	}
+
+	// Check if there is an ongoing event
+	if s.countdown.id != "" {
+		//Stop the ongoing event
+		s.logger.Info("Stopping ongoing event")
+		_, err := s.store.StopEvent(ctx, Event{s.countdown.id, s.countdown.timestamp.Format(time.RFC3339)})
+		if err != nil {
+			s.logger.Info("Error stopping event", zap.Error(err))
+		}
+		//Call StopEvent
+		_, err = s.StopEvent(ctx, Event{s.countdown.id, s.countdown.timestamp.Format(time.RFC3339)})
+		if err != nil {
+			s.logger.Info("Error stopping event", zap.Error(err))
+		}
+	}
+
+	//Now we shouldn't be leaking any goroutines
 
 	ce := currentEvent{
 		id:        uuid.Must(uuid.NewRandom()).String(),
