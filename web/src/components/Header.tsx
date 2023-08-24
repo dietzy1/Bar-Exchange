@@ -1,4 +1,5 @@
 /** @format */
+
 import { AiOutlineStock } from "react-icons/ai";
 
 export default function Header(): JSX.Element {
@@ -10,6 +11,7 @@ export default function Header(): JSX.Element {
 
           <span className="text-green-500">BØRS</span>
           <span className="text-red-500">BAR</span>
+
           <AiOutlineStock
             className="inline-block ml-2 text-red-500"
             style={{ transform: "scaleX(-1)" }}
