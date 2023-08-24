@@ -158,11 +158,6 @@ export class StopEventResponse extends Message<StopEventResponse> {
  * @generated from message event.v1.GetEventRequest
  */
 export class GetEventRequest extends Message<GetEventRequest> {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id = "";
-
   constructor(data?: PartialMessage<GetEventRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -171,7 +166,6 @@ export class GetEventRequest extends Message<GetEventRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "event.v1.GetEventRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetEventRequest {

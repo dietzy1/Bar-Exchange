@@ -6,7 +6,3 @@ plugins:
   - plugin: es
     out: .
     opt: target=ts
-  # This will invoke protoc-gen-connect-query
-  - plugin: connect-query
-    out: .
-    opt: target=ts
