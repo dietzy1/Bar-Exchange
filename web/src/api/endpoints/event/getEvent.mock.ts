@@ -6,7 +6,6 @@ import { GetEventResponse } from "@/api/protos/v1/event/event_pb";
 //sconst url = new RegExp(/v1\/event\/\d+$/);
 const url = new RegExp(/v1\/event\//); //I hate fucking regexes
 httpMock.onGet(url).reply(() => {
-  console.log("Mocking getEvent");
   //Date time as string in rfc3339 format 30min from now
   const now = new Date();
   now.setMinutes(now.getMinutes() + 30);

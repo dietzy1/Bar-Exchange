@@ -15,7 +15,7 @@ if (ENV.MOCKED) {
 
 //This function I might actually be able to
 const GetEvent = async (req: GetEventRequest) => {
-  const { data } = await http.get(`v1/event/${req.id}`);
+  const { data } = await http.get(`v1/event/get`);
 
   return data as GetEventResponse;
 };
