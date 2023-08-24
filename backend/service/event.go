@@ -115,7 +115,10 @@ func (s *eventService) StartEvent(ctx context.Context, req Event) (Event, error)
 
 	go s.startCountdown()
 
-	//return s.store.StartEvent(ctx, req)
+	_, err = s.store.StartEvent(ctx, req)
+	if err != nil {
+		return Event{}, err
+	}
 
 	return Event{
 		Id:              ce.id,
