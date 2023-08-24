@@ -42,8 +42,7 @@ type eventService struct {
 type eventStore interface {
 	StartEvent(ctx context.Context, req Event) (Event, error)
 	StopEvent(ctx context.Context, req Event) (Event, error)
-	GetEvent(ctx context.Context, req Event) (Event, error)
-	GetEvents(ctx context.Context, req Event) ([]Event, error)
+	GetEvent(ctx context.Context) (Event, error)
 }
 
 func NewEventService(store eventStore, logger *zap.Logger) (*eventService, error) {
@@ -52,15 +51,17 @@ func NewEventService(store eventStore, logger *zap.Logger) (*eventService, error
 		return nil, fmt.Errorf("EventStore is nil")
 	}
 
+	//I should probaly introduce some logic here that checks if the stored event hasn't timed out and wasn't removed from the database
+
 	//use store object to check if there is an ongoing event -- To ensure fault tolerance
-	events, err := store.GetEvents(context.TODO(), Event{})
+	event, err := store.GetEvent(context.TODO())
 	if err != nil {
 		logger.Info("No current event")
 	}
 	//If a current event exists call into startEvent
-	if len(events) > 0 {
+	if event != (Event{}) {
 		logger.Info("Current event exists")
-		_, err := store.StartEvent(context.TODO(), Event{events[0].Id, events[0].FutureTimeStamp})
+		_, err := store.StartEvent(context.TODO(), Event{event.Id, event.FutureTimeStamp})
 		if err != nil {
 			logger.Info("Error starting event", zap.Error(err))
 		}
@@ -161,7 +162,7 @@ func (s *eventService) StopEvent(ctx context.Context, req Event) (Event, error) 
 	return s.store.StopEvent(ctx, req)
 }
 
-func (s *eventService) GetEvent(ctx context.Context, req Event) (Event, error) {
+func (s *eventService) GetEvent(ctx context.Context) (Event, error) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -171,18 +172,16 @@ func (s *eventService) GetEvent(ctx context.Context, req Event) (Event, error) {
 	}
 
 	// Retrieve the ongoing event details
-	if s.countdown.id == req.Id {
 
-		remaining, rfc3339Timestamp := getTimeRemaining(s.countdown.timestamp)
-		s.logger.Info("Timer", zap.Int("Days", remaining.d), zap.Int("Hours", remaining.h), zap.Int("Minutes", remaining.m), zap.Int("Seconds", remaining.s))
+	remaining, rfc3339Timestamp := getTimeRemaining(s.countdown.timestamp)
+	s.logger.Info("Timer", zap.Int("Days", remaining.d), zap.Int("Hours", remaining.h), zap.Int("Minutes", remaining.m), zap.Int("Seconds", remaining.s))
 
-		return Event{
-			Id:              s.countdown.id,
-			FutureTimeStamp: rfc3339Timestamp,
-		}, nil
-	}
+	return Event{
+		Id:              s.countdown.id,
+		FutureTimeStamp: rfc3339Timestamp,
+	}, nil
 
-	return s.store.GetEvent(ctx, req)
+	//return s.store.GetEvent(ctx)
 }
 
 //

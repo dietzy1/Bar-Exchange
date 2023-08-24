@@ -28,26 +28,12 @@ func (d *db) StopEvent(ctx context.Context, req service.Event) (service.Event, e
 
 }
 
-func (d *db) GetEvent(ctx context.Context, req service.Event) (service.Event, error) {
+func (d *db) GetEvent(ctx context.Context) (service.Event, error) {
 
 	var event service.Event
-	if err := d.client.Database(datastore).Collection(eventCollection).FindOne(ctx, bson.M{"id": req.Id}).Decode(&event); err != nil {
+	if err := d.client.Database(datastore).Collection(eventCollection).FindOne(ctx, bson.M{}).Decode(&event); err != nil {
 		return service.Event{}, err
 	}
 
 	return event, nil
-}
-
-func (d *db) GetEvents(ctx context.Context, req service.Event) ([]service.Event, error) {
-
-	var events []service.Event
-	cursor, err := d.client.Database(datastore).Collection(eventCollection).Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	if err := cursor.All(ctx, &events); err != nil {
-		return nil, err
-	}
-
-	return events, nil
 }
