@@ -20,7 +20,7 @@ export default function Footer(): JSX.Element {
             </h1>
           </div>
           <div className="flex justify-center align-middle">
-            <Timer totalHours={6} />
+            <Timer />
           </div>
         </div>
 
