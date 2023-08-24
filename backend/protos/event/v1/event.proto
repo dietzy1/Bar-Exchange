@@ -5,51 +5,45 @@ package event.v1;
 import "google/api/annotations.proto";
 
 option go_package = "github.com/dietzy1/børsbar/backend/protos/event/v1;eventv1";
-                
+
 service EventService {
-rpc StartEvent(StartEventRequest) returns (StartEventResponse) {
-  option (google.api.http) = {
-   post: "/v1/event/start"
-   body: "*"
-  };
- }
- 
- rpc StopEvent(StopEventRequest) returns (StopEventResponse) {
-  option (google.api.http) = {
-   post: "/v1/event/stop"
-   body: "*"
-  };
- }
+  rpc StartEvent(StartEventRequest) returns (StartEventResponse) {
+    option (google.api.http) = {
+      post: "/v1/event/start"
+      body: "*"
+    };
+  }
 
- rpc GetEvent(GetEventRequest) returns (GetEventResponse) {
-  option (google.api.http) = {
-   get: "/v1/event/{id}"
-  };
- }
+  rpc StopEvent(StopEventRequest) returns (StopEventResponse) {
+    option (google.api.http) = {
+      post: "/v1/event/stop"
+      body: "*"
+    };
+  }
 
+  rpc GetEvent(GetEventRequest) returns (GetEventResponse) {
+    option (google.api.http) = {get: "/v1/event/get"};
+  }
 }
 
 message StartEventRequest {
-string future_timestamp = 1;
+  string future_timestamp = 1;
 }
 
 message StartEventResponse {
- string id = 1;
- int64 duration= 2;
+  string id = 1;
+  int64 duration = 2;
 }
 
 message StopEventRequest {
- string id = 1;
+  string id = 1;
 }
 
-message StopEventResponse {
-}
+message StopEventResponse {}
 
-message GetEventRequest {
- string id = 1;
-}
+message GetEventRequest {}
 
 message GetEventResponse {
- string id = 1;
- string future_timestamp = 2;
+  string id = 1;
+  string future_timestamp = 2;
 }
