@@ -50,6 +50,11 @@ func main() {
 		logger.Fatal("failed to initialize event service", zap.Error(err))
 	}
 
+	beverageService, err := service.NewBeverageService(store, logger)
+	if err != nil {
+		logger.Fatal("failed to initialize beverage service", zap.Error(err))
+	}
+
 	serverConfig := &server.Config{
 		// Set your server configuration here
 		Addr:        config.ServerPort,
@@ -57,7 +62,7 @@ func main() {
 		Logger:      logger,
 	}
 
-	s := server.New(serverConfig, eventService)
+	s := server.New(serverConfig, eventService, beverageService)
 
 	// Start the gRPC server in a separate goroutine
 	go func() {
