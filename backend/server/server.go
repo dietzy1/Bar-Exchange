@@ -23,7 +23,8 @@ type server struct {
 	config *Config
 
 	//Domain interface
-	event event
+	event    event
+	beverage beverage
 }
 
 type Config struct {
@@ -32,7 +33,7 @@ type Config struct {
 	Logger      *zap.Logger
 }
 
-func New(c *Config, event event) *server {
+func New(c *Config, event event, beverage beverage) *server {
 
 	if c.Addr == "" {
 		c.Addr = ":8000"
@@ -54,10 +55,11 @@ func New(c *Config, event event) *server {
 	)
 
 	s := &server{
-		grpc:   grpc,
-		logger: c.Logger,
-		config: c,
-		event:  event,
+		grpc:     grpc,
+		logger:   c.Logger,
+		config:   c,
+		event:    event,
+		beverage: beverage,
 	}
 
 	//Register the server object methods with the GRPC server
