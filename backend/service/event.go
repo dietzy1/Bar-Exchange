@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,33 +14,15 @@ type Event struct {
 	FutureTimeStamp string
 }
 
-type countdown struct {
-	t int
-	d int
-	h int
-	m int
-	s int
-}
-
-type currentEvent struct {
-	id        string
-	timestamp time.Time
-	timer     *time.Timer
-	stopCh    chan struct{} // Channel to signal event stop
-}
-
 type eventService struct {
 	store eventStore
 
 	logger *zap.Logger
-
-	mu        sync.RWMutex
-	countdown currentEvent
 }
 
 type eventStore interface {
-	StartEvent(ctx context.Context, req Event) (Event, error)
-	StopEvent(ctx context.Context, req Event) (Event, error)
+	StartEvent(ctx context.Context, req Event) error
+	StopEvent(ctx context.Context, req Event) error
 	GetEvent(ctx context.Context) (Event, error)
 }
 
@@ -51,159 +32,91 @@ func NewEventService(store eventStore, logger *zap.Logger) (*eventService, error
 		return nil, fmt.Errorf("EventStore is nil")
 	}
 
-	//I should probaly introduce some logic here that checks if the stored event hasn't timed out and wasn't removed from the database
+	//Create event service
+	eventService := &eventService{store: store, logger: logger}
 
 	//use store object to check if there is an ongoing event -- To ensure fault tolerance
 	event, err := store.GetEvent(context.TODO())
 	if err != nil {
-		logger.Info("No current event")
+		logger.Info("No current event found, using default configuration")
 	}
-	//If a current event exists call into startEvent
+	//If a current event exists use event information to start the event again
 	if event != (Event{}) {
-		logger.Info("Current event exists")
-		_, err := store.StartEvent(context.TODO(), Event{event.Id, event.FutureTimeStamp})
-		if err != nil {
-			logger.Info("Error starting event", zap.Error(err))
+
+		if err := eventService.restartEvent(context.Background(), event); err != nil {
+			logger.Error("failed to restart event", zap.Error(err))
 		}
+
 	}
 
-	return &eventService{store: store, logger: logger, mu: sync.RWMutex{}}, nil
+	return eventService, nil
 }
 
 func (s *eventService) StartEvent(ctx context.Context, req Event) (Event, error) {
-	if req.FutureTimeStamp == "" {
-		return Event{}, fmt.Errorf("empty future timestamp")
-	}
-
-	timestamp, err := time.Parse(time.RFC3339, req.FutureTimeStamp)
-	if err != nil {
-		return Event{}, fmt.Errorf("invalid future timestamp")
-	}
-	s.logger.Info("timestamp", zap.String("timestamp", timestamp.String()))
-
-	//We need a function which checks if the timestamp is in the past
-	if timestamp.Before(time.Now()) {
-		return Event{}, fmt.Errorf("timestamp is in the past")
-	}
-
-	// Check if there is an ongoing event
-	if s.countdown.id != "" {
-		//Stop the ongoing event
-		s.logger.Info("Stopping ongoing event")
-		_, err := s.store.StopEvent(ctx, Event{s.countdown.id, s.countdown.timestamp.Format(time.RFC3339)})
-		if err != nil {
-			s.logger.Info("Error stopping event", zap.Error(err))
-		}
-		//Call StopEvent
-		_, err = s.StopEvent(ctx, Event{s.countdown.id, s.countdown.timestamp.Format(time.RFC3339)})
-		if err != nil {
-			s.logger.Info("Error stopping event", zap.Error(err))
-		}
-	}
-
-	//Now we shouldn't be leaking any goroutines
-
-	ce := currentEvent{
-		id:        uuid.Must(uuid.NewRandom()).String(),
-		timestamp: timestamp,
-		stopCh:    make(chan struct{}),
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.countdown = ce
-
-	go s.startCountdown()
-
-	_, err = s.store.StartEvent(ctx, req)
-	if err != nil {
+	// Perform check to see if event is in the past and valid
+	if err := validateTimeStamp(req.FutureTimeStamp); err != nil {
 		return Event{}, err
 	}
 
-	return Event{
-		Id:              ce.id,
-		FutureTimeStamp: req.FutureTimeStamp,
-	}, nil
+	req.Id = newID()
+
+	//Start new event also deletes the old event
+	if err := s.store.StartEvent(ctx, req); err != nil {
+		return Event{}, fmt.Errorf("failed to start event: %w", err)
+	}
+	return req, nil
 }
 
-func (s *eventService) startCountdown() {
+func (s *eventService) StopEvent(ctx context.Context, req Event) error {
 
-	// Get the time remaining until the event
-	remaining, _ := getTimeRemaining(s.countdown.timestamp)
-	s.logger.Info("Timer", zap.Int("Days", remaining.d), zap.Int("Hours", remaining.h), zap.Int("Minutes", remaining.m), zap.Int("Seconds", remaining.s))
-
-	// Create a timer for the countdown
-	s.countdown.timer = time.NewTimer(time.Duration(remaining.t) * time.Second)
-
-	// Wait for the timer to expire
-	select {
-	case <-s.countdown.timer.C:
-		s.logger.Info("timer expired")
-	case <-s.countdown.stopCh:
-		s.logger.Info("timer stopped")
+	//Stop the event
+	if err := s.store.StopEvent(ctx, req); err != nil {
+		return fmt.Errorf("failed to stop event: %w", err)
 	}
+	return nil
 
-	// Clear the current event
-	s.countdown = currentEvent{}
-}
-
-func (s *eventService) StopEvent(ctx context.Context, req Event) (Event, error) {
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if s.countdown.id != "" && s.countdown.id == req.Id {
-		// Signal the stop channel to stop the countdown
-		close(s.countdown.stopCh)
-		s.countdown = currentEvent{} // Clear the current event
-	}
-
-	return s.store.StopEvent(ctx, req)
 }
 
 func (s *eventService) GetEvent(ctx context.Context) (Event, error) {
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	// Check if there is an ongoing event
-	if s.countdown.id == "" {
-		return Event{}, fmt.Errorf("no ongoing event")
+	event, err := s.store.GetEvent(ctx)
+	if err != nil {
+		return Event{}, fmt.Errorf("failed to get event: %w", err)
 	}
-
-	// Retrieve the ongoing event details
-
-	remaining, rfc3339Timestamp := getTimeRemaining(s.countdown.timestamp)
-	s.logger.Info("Timer", zap.Int("Days", remaining.d), zap.Int("Hours", remaining.h), zap.Int("Minutes", remaining.m), zap.Int("Seconds", remaining.s))
-
-	return Event{
-		Id:              s.countdown.id,
-		FutureTimeStamp: rfc3339Timestamp,
-	}, nil
-
-	//return s.store.GetEvent(ctx)
+	return event, nil
 }
 
-//
+func (s *eventService) restartEvent(ctx context.Context, req Event) error {
+	//Perform check to see if event is in the past and valid
+	if err := validateTimeStamp(req.FutureTimeStamp); err != nil {
 
-// Helper function to get the time remaining until the event
-func getTimeRemaining(t time.Time) (countdown, string) {
-	currentTime := time.Now()
-	difference := t.Sub(currentTime)
+		//If the event is invalid then delete the event from the database
+		if err := s.store.StopEvent(ctx, req); err != nil {
+			return fmt.Errorf("failed to stop event: %w", err)
+		}
 
-	total := int(difference.Seconds())
-	days := int(total / (60 * 60 * 24))
-	hours := int(total / (60 * 60) % 24)
-	minutes := int(total/60) % 60
-	seconds := int(total % 60)
+		return err
+	}
+	return nil
+}
 
-	rfc3339Timestamp := t.Format(time.RFC3339)
+func validateTimeStamp(timeStamp string) error {
+	if timeStamp == "" {
+		return fmt.Errorf("empty future timestamp")
+	}
 
-	return countdown{
-		t: total,
-		d: days,
-		h: hours,
-		m: minutes,
-		s: seconds,
-	}, rfc3339Timestamp
+	timestamp, err := time.Parse(time.RFC3339, timeStamp)
+	if err != nil {
+		return fmt.Errorf("invalid future timestamp")
+	}
+
+	//We need a function which checks if the timestamp is in the past
+	if timestamp.Before(time.Now()) {
+		return fmt.Errorf("timestamp is in the past")
+	}
+	return nil
+}
+
+func newID() string {
+	return uuid.Must(uuid.NewRandom()).String()
 }

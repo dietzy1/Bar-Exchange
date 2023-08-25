@@ -9,7 +9,7 @@ import (
 
 type event interface {
 	StartEvent(ctx context.Context, req service.Event) (service.Event, error)
-	StopEvent(ctx context.Context, req service.Event) (service.Event, error)
+	StopEvent(ctx context.Context, req service.Event) error
 	GetEvent(ctx context.Context) (service.Event, error)
 }
 
@@ -37,8 +37,7 @@ func (s *server) StopEvent(ctx context.Context, req *pb.StopEventRequest) (*pb.S
 		Id: req.Id,
 	}
 
-	_, err := s.event.StopEvent(ctx, input)
-	if err != nil {
+	if err := s.event.StopEvent(ctx, input); err != nil {
 		return nil, err
 	}
 
