@@ -9,10 +9,32 @@ option go_package = "github.com/dietzy1/børsbar/backend/protos/beverage/v1;beve
 //What services do I actually need to implement
 
 service BeverageService {
-  /*     option (google.api.http) = {
-       post: "/messagegateway.v1.MessageGatewayService/GetMessages",
-       body: "*",
-     }; */
+  rpc GetBeverages(GetBeveragesRequest) returns (GetBeveragesResponse) {
+    option (google.api.http) = {get: "/v1/beverages"};
+  }
+
+  //Should be authenticated called on behalf of the bartender
+  rpc CreateBeverage(CreateBeverageRequest) returns (CreateBeverageResponse) {
+    option (google.api.http) = {
+      post: "/v1/beverages",
+      body: "*",
+    };
+  }
+
+  //Should be authenticated called on behalf of the bartender
+  rpc UpdateBeverage(UpdateBeverageRequest) returns (UpdateBeverageResponse) {
+    option (google.api.http) = {
+      put: "/v1/beverages",
+      body: "*",
+    };
+  }
+
+  //Should be authenticated called on behalf of the bartender
+  rpc DeleteBeverage(DeleteBeverageRequest) returns (DeleteBeverageResponse) {
+    option (google.api.http) = {delete: "/v1/beverages/{id}"};
+  }
+
+  //Should be authenticated called on behalf of the bartender
 }
 
 message Beverage {
@@ -35,6 +57,30 @@ enum Status {
   STATUS_DECREASING = 1;
   STATUS_NO_CHANGE = 2;
 }
+
+message GetBeveragesRequest {}
+
+message GetBeveragesResponse {
+  repeated Beverage beverages = 1;
+}
+
+message CreateBeverageRequest {
+  Beverage beverage = 1;
+}
+
+message CreateBeverageResponse {}
+
+message UpdateBeverageRequest {
+  Beverage beverage = 1;
+}
+
+message UpdateBeverageResponse {}
+
+message DeleteBeverageRequest {
+  string id = 1;
+}
+
+message DeleteBeverageResponse {}
 
 //Admin service for bartenders where they are able to start/stop the timer for an event
 //Admin service for bartenders where they are able to make requests to increase price of a drink

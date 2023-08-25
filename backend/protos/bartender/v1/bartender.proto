@@ -6,6 +6,20 @@ import "google/api/annotations.proto";
 
 option go_package = "github.com/dietzy1/børsbar/backend/protos/bartender/v1;bartenderv1";
 
-service BartenderService {}
+service BartenderService {
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
+    option (google.api.http) = {
+      post: "/v1/bartender/authenticate"
+      body: "*"
+    };
+  }
+}
 
-//I only need to add functionality for one bartender to be created
+message AuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  string token = 1;
+}

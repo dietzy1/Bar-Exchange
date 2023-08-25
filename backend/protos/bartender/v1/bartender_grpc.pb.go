@@ -7,7 +7,10 @@
 package bartenderv1
 
 import (
+	context "context"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -15,12 +18,15 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-const ()
+const (
+	BartenderService_Authenticate_FullMethodName = "/bartender.v1.BartenderService/Authenticate"
+)
 
 // BartenderServiceClient is the client API for BartenderService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BartenderServiceClient interface {
+	Authenticate(ctx context.Context, in *AuthenticateRequest, opts ...grpc.CallOption) (*AuthenticateResponse, error)
 }
 
 type bartenderServiceClient struct {
@@ -31,14 +37,28 @@ func NewBartenderServiceClient(cc grpc.ClientConnInterface) BartenderServiceClie
 	return &bartenderServiceClient{cc}
 }
 
+func (c *bartenderServiceClient) Authenticate(ctx context.Context, in *AuthenticateRequest, opts ...grpc.CallOption) (*AuthenticateResponse, error) {
+	out := new(AuthenticateResponse)
+	err := c.cc.Invoke(ctx, BartenderService_Authenticate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BartenderServiceServer is the server API for BartenderService service.
 // All implementations should embed UnimplementedBartenderServiceServer
 // for forward compatibility
 type BartenderServiceServer interface {
+	Authenticate(context.Context, *AuthenticateRequest) (*AuthenticateResponse, error)
 }
 
 // UnimplementedBartenderServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedBartenderServiceServer struct {
+}
+
+func (UnimplementedBartenderServiceServer) Authenticate(context.Context, *AuthenticateRequest) (*AuthenticateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Authenticate not implemented")
 }
 
 // UnsafeBartenderServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -52,13 +72,36 @@ func RegisterBartenderServiceServer(s grpc.ServiceRegistrar, srv BartenderServic
 	s.RegisterService(&BartenderService_ServiceDesc, srv)
 }
 
+func _BartenderService_Authenticate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthenticateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BartenderServiceServer).Authenticate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BartenderService_Authenticate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BartenderServiceServer).Authenticate(ctx, req.(*AuthenticateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BartenderService_ServiceDesc is the grpc.ServiceDesc for BartenderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BartenderService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "bartender.v1.BartenderService",
 	HandlerType: (*BartenderServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "bartender/v1/bartender.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Authenticate",
+			Handler:    _BartenderService_Authenticate_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "bartender/v1/bartender.proto",
 }

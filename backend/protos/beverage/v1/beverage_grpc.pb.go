@@ -7,7 +7,10 @@
 package beveragev1
 
 import (
+	context "context"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -15,12 +18,24 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-const ()
+const (
+	BeverageService_GetBeverages_FullMethodName   = "/beverage.v1.BeverageService/GetBeverages"
+	BeverageService_CreateBeverage_FullMethodName = "/beverage.v1.BeverageService/CreateBeverage"
+	BeverageService_UpdateBeverage_FullMethodName = "/beverage.v1.BeverageService/UpdateBeverage"
+	BeverageService_DeleteBeverage_FullMethodName = "/beverage.v1.BeverageService/DeleteBeverage"
+)
 
 // BeverageServiceClient is the client API for BeverageService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BeverageServiceClient interface {
+	GetBeverages(ctx context.Context, in *GetBeveragesRequest, opts ...grpc.CallOption) (*GetBeveragesResponse, error)
+	// Should be authenticated called on behalf of the bartender
+	CreateBeverage(ctx context.Context, in *CreateBeverageRequest, opts ...grpc.CallOption) (*CreateBeverageResponse, error)
+	// Should be authenticated called on behalf of the bartender
+	UpdateBeverage(ctx context.Context, in *UpdateBeverageRequest, opts ...grpc.CallOption) (*UpdateBeverageResponse, error)
+	// Should be authenticated called on behalf of the bartender
+	DeleteBeverage(ctx context.Context, in *DeleteBeverageRequest, opts ...grpc.CallOption) (*DeleteBeverageResponse, error)
 }
 
 type beverageServiceClient struct {
@@ -31,14 +46,70 @@ func NewBeverageServiceClient(cc grpc.ClientConnInterface) BeverageServiceClient
 	return &beverageServiceClient{cc}
 }
 
+func (c *beverageServiceClient) GetBeverages(ctx context.Context, in *GetBeveragesRequest, opts ...grpc.CallOption) (*GetBeveragesResponse, error) {
+	out := new(GetBeveragesResponse)
+	err := c.cc.Invoke(ctx, BeverageService_GetBeverages_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *beverageServiceClient) CreateBeverage(ctx context.Context, in *CreateBeverageRequest, opts ...grpc.CallOption) (*CreateBeverageResponse, error) {
+	out := new(CreateBeverageResponse)
+	err := c.cc.Invoke(ctx, BeverageService_CreateBeverage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *beverageServiceClient) UpdateBeverage(ctx context.Context, in *UpdateBeverageRequest, opts ...grpc.CallOption) (*UpdateBeverageResponse, error) {
+	out := new(UpdateBeverageResponse)
+	err := c.cc.Invoke(ctx, BeverageService_UpdateBeverage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *beverageServiceClient) DeleteBeverage(ctx context.Context, in *DeleteBeverageRequest, opts ...grpc.CallOption) (*DeleteBeverageResponse, error) {
+	out := new(DeleteBeverageResponse)
+	err := c.cc.Invoke(ctx, BeverageService_DeleteBeverage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BeverageServiceServer is the server API for BeverageService service.
 // All implementations should embed UnimplementedBeverageServiceServer
 // for forward compatibility
 type BeverageServiceServer interface {
+	GetBeverages(context.Context, *GetBeveragesRequest) (*GetBeveragesResponse, error)
+	// Should be authenticated called on behalf of the bartender
+	CreateBeverage(context.Context, *CreateBeverageRequest) (*CreateBeverageResponse, error)
+	// Should be authenticated called on behalf of the bartender
+	UpdateBeverage(context.Context, *UpdateBeverageRequest) (*UpdateBeverageResponse, error)
+	// Should be authenticated called on behalf of the bartender
+	DeleteBeverage(context.Context, *DeleteBeverageRequest) (*DeleteBeverageResponse, error)
 }
 
 // UnimplementedBeverageServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedBeverageServiceServer struct {
+}
+
+func (UnimplementedBeverageServiceServer) GetBeverages(context.Context, *GetBeveragesRequest) (*GetBeveragesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBeverages not implemented")
+}
+func (UnimplementedBeverageServiceServer) CreateBeverage(context.Context, *CreateBeverageRequest) (*CreateBeverageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBeverage not implemented")
+}
+func (UnimplementedBeverageServiceServer) UpdateBeverage(context.Context, *UpdateBeverageRequest) (*UpdateBeverageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBeverage not implemented")
+}
+func (UnimplementedBeverageServiceServer) DeleteBeverage(context.Context, *DeleteBeverageRequest) (*DeleteBeverageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBeverage not implemented")
 }
 
 // UnsafeBeverageServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -52,13 +123,102 @@ func RegisterBeverageServiceServer(s grpc.ServiceRegistrar, srv BeverageServiceS
 	s.RegisterService(&BeverageService_ServiceDesc, srv)
 }
 
+func _BeverageService_GetBeverages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBeveragesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BeverageServiceServer).GetBeverages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BeverageService_GetBeverages_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BeverageServiceServer).GetBeverages(ctx, req.(*GetBeveragesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BeverageService_CreateBeverage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBeverageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BeverageServiceServer).CreateBeverage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BeverageService_CreateBeverage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BeverageServiceServer).CreateBeverage(ctx, req.(*CreateBeverageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BeverageService_UpdateBeverage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateBeverageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BeverageServiceServer).UpdateBeverage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BeverageService_UpdateBeverage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BeverageServiceServer).UpdateBeverage(ctx, req.(*UpdateBeverageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BeverageService_DeleteBeverage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBeverageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BeverageServiceServer).DeleteBeverage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BeverageService_DeleteBeverage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BeverageServiceServer).DeleteBeverage(ctx, req.(*DeleteBeverageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BeverageService_ServiceDesc is the grpc.ServiceDesc for BeverageService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BeverageService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "beverage.v1.BeverageService",
 	HandlerType: (*BeverageServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "beverage/v1/beverage.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetBeverages",
+			Handler:    _BeverageService_GetBeverages_Handler,
+		},
+		{
+			MethodName: "CreateBeverage",
+			Handler:    _BeverageService_CreateBeverage_Handler,
+		},
+		{
+			MethodName: "UpdateBeverage",
+			Handler:    _BeverageService_UpdateBeverage_Handler,
+		},
+		{
+			MethodName: "DeleteBeverage",
+			Handler:    _BeverageService_DeleteBeverage_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "beverage/v1/beverage.proto",
 }
