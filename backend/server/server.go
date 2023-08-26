@@ -37,7 +37,7 @@ func New(c *Config, event event, beverage beverage) *server {
 
 	if c.Addr == "" {
 		c.Addr = ":8000"
-		c.Logger.Info("No port specified, defaulting to 9000")
+		c.Logger.Info("No port specified, defaulting to 8000")
 	}
 
 	if c.Addr == "" {

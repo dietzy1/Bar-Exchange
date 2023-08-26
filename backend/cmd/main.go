@@ -8,10 +8,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dietzy1/Bar-Exchange/broker"
 	"github.com/dietzy1/Bar-Exchange/config"
 	"github.com/dietzy1/Bar-Exchange/datastore"
 	"github.com/dietzy1/Bar-Exchange/server"
 	"github.com/dietzy1/Bar-Exchange/service"
+	"github.com/dietzy1/Bar-Exchange/websocket"
 	"go.uber.org/zap"
 )
 
@@ -55,6 +57,31 @@ func main() {
 		logger.Fatal("failed to initialize beverage service", zap.Error(err))
 	}
 
+	//TODO: Figure out if this stuff needs to be extracted into its own seperate package potentially
+	broker, err := broker.New(&broker.Options{
+		Logger: logger,
+		Uri:    config.REDISURI,
+	})
+	if err != nil {
+		logger.Fatal("failed to initialize broker", zap.Error(err))
+	}
+
+	websocketManager, err := websocket.NewWebsocketManager(&websocket.ManagerOptions{
+		Addr:   config.WebsocketPort,
+		Logger: logger,
+		Broker: broker,
+	})
+	if err != nil {
+		logger.Fatal("failed to initialize websocket manager", zap.Error(err))
+	}
+
+	go func() {
+		if err := websocketManager.ListenAndServe(); err != nil {
+			logger.Fatal("failed to start websocket manager", zap.Error(err))
+		}
+
+	}()
+
 	serverConfig := &server.Config{
 		// Set your server configuration here
 		Addr:        config.ServerPort,
@@ -92,6 +119,8 @@ func main() {
 
 	// Start the graceful shutdown
 	s.Stop(ctx)
+	websocketManager.Stop(ctx)
+
 	logger.Info("Application gracefully stopped")
 	os.Exit(0)
 
