@@ -13,11 +13,13 @@ import (
 type Config struct {
 	//Db settings
 	DBURI     string
+	REDISURI  string
 	DBTimeout int
 
 	//Server settings
-	ServerPort  string
-	GatewayPort string
+	ServerPort    string
+	GatewayPort   string
+	WebsocketPort string
 }
 
 // Instantiate a new configuration -- reads from .env file
@@ -28,6 +30,11 @@ func New() (*Config, error) {
 	dbURI, err := stringEnvVar("DB_URI")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get DB_URI: %v", err)
+	}
+
+	redisURI, err := stringEnvVar("REDIS_URI")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get REDIS_URI: %v", err)
 	}
 
 	dbTimeout, err := intEnvVar("DB_TIMEOUT")
@@ -45,11 +52,20 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("failed to get GATEWAY_PORT: %v", err)
 	}
 
+	websocketPort, err := stringEnvVar("WEBSOCKET_PORT")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get WEBSOCKET_PORT: %v", err)
+	}
+
 	return &Config{
-		DBURI:       dbURI,
-		DBTimeout:   dbTimeout,
-		ServerPort:  serverPort,
-		GatewayPort: gatewayPort,
+		DBURI:    dbURI,
+		REDISURI: redisURI,
+
+		DBTimeout: dbTimeout,
+
+		ServerPort:    serverPort,
+		GatewayPort:   gatewayPort,
+		WebsocketPort: websocketPort,
 	}, nil
 }
 
