@@ -181,7 +181,7 @@ func RegisterEventServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/event.v1.EventService/GetEvent", runtime.WithHTTPPathPattern("/v1/event/get"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/event.v1.EventService/GetEvent", runtime.WithHTTPPathPattern("/v1/event"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -289,7 +289,7 @@ func RegisterEventServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/event.v1.EventService/GetEvent", runtime.WithHTTPPathPattern("/v1/event/get"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/event.v1.EventService/GetEvent", runtime.WithHTTPPathPattern("/v1/event"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -313,7 +313,7 @@ var (
 
 	pattern_EventService_StopEvent_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "event", "stop"}, ""))
 
-	pattern_EventService_GetEvent_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "event", "get"}, ""))
+	pattern_EventService_GetEvent_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "event"}, ""))
 )
 
 var (
