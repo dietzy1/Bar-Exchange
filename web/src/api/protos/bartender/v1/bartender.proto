@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package bartender.v1;
+
+service BartenderService {
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {}
+}
+
+message AuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  string token = 1;
+}

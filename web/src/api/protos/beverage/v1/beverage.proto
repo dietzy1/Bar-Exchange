@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package beverage.v1;
+
+service BeverageService {
+  rpc GetBeverages(GetBeveragesRequest) returns (GetBeveragesResponse) {}
+
+  //Should be authenticated called on behalf of the bartender
+  rpc CreateBeverage(CreateBeverageRequest) returns (CreateBeverageResponse) {}
+
+  //Should be authenticated called on behalf of the bartender
+  rpc UpdateBeverage(UpdateBeverageRequest) returns (UpdateBeverageResponse) {}
+
+  //Should be authenticated called on behalf of the bartender
+  rpc DeleteBeverage(DeleteBeverageRequest) returns (DeleteBeverageResponse) {}
+
+  //Should be authenticated called on behalf of the bartender
+}
+
+message Beverage {
+  string id = 1;
+  string price = 2;
+  string name = 3;
+  int64 percentage_change = 4;
+  BeverageType type = 5;
+  Status status = 6;
+}
+
+enum BeverageType {
+  BEVERAGE_TYPE_UNSPECIFIED = 0;
+  BEVERAGE_TYPE_BEER = 1;
+  BEVERAGE_TYPE_COCKTAIL = 2;
+  BEVERAGE_TYPE_SHOTS = 3;
+}
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_INCREASING = 1;
+  STATUS_DECREASING = 2;
+  STATUS_NO_CHANGE = 3;
+}
+
+message GetBeveragesRequest {}
+
+message GetBeveragesResponse {
+  repeated Beverage beverages = 1;
+}
+
+message CreateBeverageRequest {
+  Beverage beverage = 1;
+}
+
+message CreateBeverageResponse {}
+
+message UpdateBeverageRequest {
+  Beverage beverage = 1;
+}
+
+message UpdateBeverageResponse {}
+
+message DeleteBeverageRequest {
+  string id = 1;
+}
+
+message DeleteBeverageResponse {}
