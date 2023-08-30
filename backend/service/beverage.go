@@ -73,7 +73,7 @@ func (s *beverageService) GetBeverages(ctx context.Context) ([]Beverage, error) 
 
 func (s *beverageService) CreateBeverage(ctx context.Context, req Beverage) error {
 
-	if err := validateCreateBeverage(req); err != nil {
+	if err := ValidateCreateBeverage(req); err != nil {
 		s.logger.Error("failed to validate beverage", zap.Error(err))
 		return fmt.Errorf("failed to validate beverage: %w", err)
 	}
@@ -91,7 +91,7 @@ func (s *beverageService) CreateBeverage(ctx context.Context, req Beverage) erro
 
 }
 
-func validateCreateBeverage(input Beverage) error {
+func ValidateCreateBeverage(input Beverage) error {
 
 	var errorBuilder strings.Builder
 
