@@ -64,6 +64,12 @@ func (s *eventService) StartEvent(ctx context.Context, req Event) (Event, error)
 	if err := s.store.StartEvent(ctx, req); err != nil {
 		return Event{}, fmt.Errorf("failed to start event: %w", err)
 	}
+
+	//Call into exchange service to start the event
+	if err := s.exchange.Simulate(ctx, req); err != nil {
+		return Event{}, fmt.Errorf("failed to start event: %w", err)
+	}
+
 	return req, nil
 }
 
@@ -73,6 +79,11 @@ func (s *eventService) StopEvent(ctx context.Context, req Event) error {
 	if err := s.store.StopEvent(ctx, req); err != nil {
 		return fmt.Errorf("failed to stop event: %w", err)
 	}
+
+	if err := s.exchange.StopSimulating(ctx); err != nil {
+		return fmt.Errorf("failed to stop event: %w", err)
+	}
+
 	return nil
 
 }
