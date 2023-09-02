@@ -11,6 +11,7 @@ import (
 	"github.com/dietzy1/Bar-Exchange/broker"
 	"github.com/dietzy1/Bar-Exchange/config"
 	"github.com/dietzy1/Bar-Exchange/datastore"
+	"github.com/dietzy1/Bar-Exchange/exchange"
 	"github.com/dietzy1/Bar-Exchange/server"
 	"github.com/dietzy1/Bar-Exchange/service"
 	"github.com/dietzy1/Bar-Exchange/websocket"
@@ -47,7 +48,20 @@ func main() {
 		logger.Fatal("failed to initialize datastore", zap.Error(err))
 	}
 
-	eventService, err := service.NewEventService(store, logger)
+	broker, err := broker.New(&broker.Options{
+		Logger: logger,
+		Uri:    config.REDISURI,
+	})
+	if err != nil {
+		logger.Fatal("failed to initialize broker", zap.Error(err))
+	}
+
+	exchangeService, err := exchange.New(logger, broker, store)
+	if err != nil {
+		logger.Fatal("failed to initialize exchange service", zap.Error(err))
+	}
+
+	eventService, err := service.NewEventService(store, exchangeService, logger)
 	if err != nil {
 		logger.Fatal("failed to initialize event service", zap.Error(err))
 	}
@@ -55,15 +69,6 @@ func main() {
 	beverageService, err := service.NewBeverageService(store, logger)
 	if err != nil {
 		logger.Fatal("failed to initialize beverage service", zap.Error(err))
-	}
-
-	//TODO: Figure out if this stuff needs to be extracted into its own seperate package potentially
-	broker, err := broker.New(&broker.Options{
-		Logger: logger,
-		Uri:    config.REDISURI,
-	})
-	if err != nil {
-		logger.Fatal("failed to initialize broker", zap.Error(err))
 	}
 
 	websocketManager, err := websocket.NewWebsocketManager(&websocket.ManagerOptions{
