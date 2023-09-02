@@ -11,6 +11,7 @@ import (
 type Beverage struct {
 	Id               string       `json:"id" bson:"id"`
 	Price            string       `json:"price" bson:"price"`
+	BasePrice        float64      `json:"base_price" bson:"base_price"`
 	Name             string       `json:"name" bson:"name"`
 	PercentageChange int          `json:"percentage_change" bson:"percentage_change"`
 	Type             BeverageType `json:"type" bson:"type"`

@@ -15,9 +15,15 @@ type Event struct {
 }
 
 type eventService struct {
-	store eventStore
+	store    eventStore
+	exchange exchangeService
 
 	logger *zap.Logger
+}
+
+type exchangeService interface {
+	Simulate(ctx context.Context, timestamp string) error
+	StopSimulating()
 }
 
 type eventStore interface {
@@ -26,14 +32,18 @@ type eventStore interface {
 	GetEvent(ctx context.Context) (Event, error)
 }
 
-func NewEventService(store eventStore, logger *zap.Logger) (*eventService, error) {
+func NewEventService(store eventStore, exchange exchangeService, logger *zap.Logger) (*eventService, error) {
 
 	if store == nil {
 		return nil, fmt.Errorf("EventStore is nil")
 	}
 
+	if exchange == nil {
+		return nil, fmt.Errorf("ExchangeService is nil")
+	}
+
 	//Create event service
-	eventService := &eventService{store: store, logger: logger}
+	eventService := &eventService{store: store, exchange: exchange, logger: logger}
 
 	//use store object to check if there is an ongoing event -- To ensure fault tolerance
 	event, err := store.GetEvent(context.TODO())
@@ -66,7 +76,7 @@ func (s *eventService) StartEvent(ctx context.Context, req Event) (Event, error)
 	}
 
 	//Call into exchange service to start the event
-	if err := s.exchange.Simulate(ctx, req); err != nil {
+	if err := s.exchange.Simulate(ctx, req.FutureTimeStamp); err != nil {
 		return Event{}, fmt.Errorf("failed to start event: %w", err)
 	}
 
@@ -80,9 +90,7 @@ func (s *eventService) StopEvent(ctx context.Context, req Event) error {
 		return fmt.Errorf("failed to stop event: %w", err)
 	}
 
-	if err := s.exchange.StopSimulating(ctx); err != nil {
-		return fmt.Errorf("failed to stop event: %w", err)
-	}
+	s.exchange.StopSimulating()
 
 	return nil
 
