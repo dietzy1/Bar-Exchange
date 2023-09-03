@@ -40,10 +40,11 @@ service BeverageService {
 message Beverage {
   string id = 1;
   string price = 2;
-  string name = 3;
-  int64 percentage_change = 4;
-  BeverageType type = 5;
-  Status status = 6;
+  string base_price = 3;
+  string name = 4;
+  int64 percentage_change = 5;
+  BeverageType type = 6;
+  Status status = 7;
 }
 
 enum BeverageType {
