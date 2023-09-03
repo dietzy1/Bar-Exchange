@@ -4,19 +4,11 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
-
-export type Beverage = {
-  id: string;
-  item: string;
-  kind: string;
-  amount: number;
-  PercentageChange: number;
-  status: "increasing" | "decreasing" | "no_change";
-};
+import { Beverage } from "@/api/protos/beverage/v1/beverage_pb";
 
 export const columns: ColumnDef<Beverage>[] = [
   {
-    accessorKey: "item",
+    accessorKey: "name",
     header: () => (
       <div className="">
         <div className="font-medium text-white">Type</div>
@@ -25,15 +17,15 @@ export const columns: ColumnDef<Beverage>[] = [
   },
 
   {
-    accessorKey: "amount",
+    accessorKey: "price",
     header: () => <div className="text-right text-white">Pris</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
+      const price = parseFloat(row.getValue("price"));
 
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "dkk",
-      }).format(amount);
+      }).format(price);
 
       return (
         <div className="text-right font-medium flex flex-row justify-end">
@@ -49,54 +41,60 @@ export const columns: ColumnDef<Beverage>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status");
 
-      if (status === "increasing") {
-        return (
-          <div className="flex flex-row">
-            <ArrowUpIcon className="text-green-500 h-6" />
-          </div>
-        );
-      } else if (status === "decreasing") {
+      if (status === "STATUS_INCREASING") {
         return (
           <div className="flex flex-row">
             <ArrowDownIcon className="text-red-500 h-6" />
           </div>
         );
-      } else {
+      } else if (status === "STATUS_DECREASING") {
+        return (
+          <div className="flex flex-row">
+            <ArrowUpIcon className="text-green-500 h-6" />
+          </div>
+        );
+      } else if (status === "STATUS_NO_CHANGE")
+        return (
+          <div className="flex flex-row">
+            {/*  <ArrowDownIcon className="text-black h-6" /> */}
+          </div>
+        );
+
+      {
         return <div></div>;
       }
     },
   },
 
   {
-    accessorKey: "PercentageChange",
-    header: () => <div className="text-right text-white">1h%</div>,
+    accessorKey: "percentageChange",
+    header: () => <div className="text-right text-white">%</div>,
     cell: ({ row }) => {
-      const PercentageChange = parseFloat(row.getValue("PercentageChange"));
+      const PercentageChange = parseFloat(row.getValue("percentageChange"));
 
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "percent",
-        maximumFractionDigits: 2,
-      }).format(PercentageChange);
+      //check if percentage is negative
+      if (PercentageChange < 0) {
+        return (
+          <div className="text-right font-medium flex flex-row justify-end text-green-500">
+            <div className="">{PercentageChange.toFixed(2)}%</div>
+          </div>
+        );
+      }
+
+      if (PercentageChange === 0) {
+        return (
+          <div className="text-right font-medium flex flex-row justify-end text-black">
+            <div className="">{PercentageChange.toFixed(2)}%</div>
+          </div>
+        );
+      }
 
       return (
         <div className="text-right font-medium flex flex-row justify-end text-red-500">
-          <div className="">{formatted}</div>
+          <div className="">{PercentageChange.toFixed(2)}%</div>
         </div>
       );
     },
   },
   // Add other columns as needed
 ];
-
-//Categories I want to display
-//- beer
-//- drinks
-//- Shots
-
-//Data I want to display
-//- name
-//- price
-//- up/down arrow
-//- hourly persentage change
-
-//I probaly want to display 2 tables
