@@ -85,22 +85,27 @@ export class Beverage extends Message<Beverage> {
   price = "";
 
   /**
-   * @generated from field: string name = 3;
+   * @generated from field: string base_price = 3;
+   */
+  basePrice = "";
+
+  /**
+   * @generated from field: string name = 4;
    */
   name = "";
 
   /**
-   * @generated from field: int64 percentage_change = 4;
+   * @generated from field: int64 percentage_change = 5;
    */
   percentageChange = protoInt64.zero;
 
   /**
-   * @generated from field: beverage.v1.BeverageType type = 5;
+   * @generated from field: beverage.v1.BeverageType type = 6;
    */
   type = BeverageType.UNSPECIFIED;
 
   /**
-   * @generated from field: beverage.v1.Status status = 6;
+   * @generated from field: beverage.v1.Status status = 7;
    */
   status = Status.UNSPECIFIED;
 
@@ -114,10 +119,11 @@ export class Beverage extends Message<Beverage> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "price", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "percentage_change", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 5, name: "type", kind: "enum", T: proto3.getEnumType(BeverageType) },
-    { no: 6, name: "status", kind: "enum", T: proto3.getEnumType(Status) },
+    { no: 3, name: "base_price", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "percentage_change", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: "type", kind: "enum", T: proto3.getEnumType(BeverageType) },
+    { no: 7, name: "status", kind: "enum", T: proto3.getEnumType(Status) },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Beverage {

@@ -20,10 +20,11 @@ service BeverageService {
 message Beverage {
   string id = 1;
   string price = 2;
-  string name = 3;
-  int64 percentage_change = 4;
-  BeverageType type = 5;
-  Status status = 6;
+  string base_price = 3;
+  string name = 4;
+  int64 percentage_change = 5;
+  BeverageType type = 6;
+  Status status = 7;
 }
 
 enum BeverageType {
@@ -63,3 +64,18 @@ message DeleteBeverageRequest {
 }
 
 message DeleteBeverageResponse {}
+
+//Admin service for bartenders where they are able to start/stop the timer for an event
+//Admin service for bartenders where they are able to make requests to increase price of a drink
+
+//Websocket service for customers which manages streaming of price data and drink data to the users
+
+//Product service
+
+//Price service
+
+//drinks service
+
+//event service
+
+//usermanagement service
