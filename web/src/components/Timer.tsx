@@ -1,8 +1,7 @@
 /** @format */
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import useGetEvent from "../api/endpoints/event/getEvent.ts";
-import { GetEventRequest } from "../api/protos/v1/event/event_pb.ts";
 
 function calculateTimeDifference(targetDateTime: Date, currentDateTime: Date) {
   const timeDifferenceMilliseconds =
@@ -12,13 +11,7 @@ function calculateTimeDifference(targetDateTime: Date, currentDateTime: Date) {
 }
 
 export default function Timer(): JSX.Element {
-  const req = useMemo(() => {
-    const request = new GetEventRequest();
-    request.id = "60faf1e6-35ad-4dce-a1c8-876b0c3b3d84";
-    return request;
-  }, []);
-
-  const { data, isLoading, error } = useGetEvent(req);
+  const { data, isLoading, error } = useGetEvent();
 
   const [remainingTime, setRemainingTime] = useState(0);
 
@@ -76,9 +69,6 @@ export default function Timer(): JSX.Element {
       </div>
     );
   }
-
-  //  const { hours, minutes, seconds } = formatTime(remainingTime);
-  if (isLoading) return <div>Loading...</div>;
 
   //Main component render
   return (
