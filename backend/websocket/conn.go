@@ -79,7 +79,7 @@ func (c *conn) writePump() {
 				return
 			}
 
-			if err := c.conn.WriteMessage(websocket.BinaryMessage, msg); err != nil {
+			if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
 
 				c.logger.Error("Failed to write message", zap.Error(err))
 				return

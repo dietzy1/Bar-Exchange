@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
@@ -41,8 +40,8 @@ func newClient(o *clientOptions) *client {
 // TODO: unsure if this is just going to turbo spin
 func (c *client) handleMessages(ch <-chan *redis.Message) {
 	for range ch {
-		//Messages recieved from the recieve channel is from the user itself
-		fmt.Println("Message recieved from user")
+
+		c.logger.Info("Handling incoming redis message")
 		msg, ok := <-ch
 		if !ok {
 			return
