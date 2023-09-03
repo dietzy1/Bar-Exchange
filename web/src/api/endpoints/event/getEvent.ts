@@ -1,9 +1,6 @@
 /** @format */
 import ENV from "@/constants/env";
-import {
-  GetEventRequest,
-  GetEventResponse,
-} from "@/api/protos/v1/event/event_pb";
+import { GetEventResponse } from "@/api/protos/event/v1/event_pb.ts";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,16 +11,16 @@ if (ENV.MOCKED) {
 }
 
 //This function I might actually be able to
-const GetEvent = async (req: GetEventRequest) => {
-  const { data } = await http.get(`v1/event/get`);
+const GetEvent = async () => {
+  const { data } = await http.get(`v1/event`);
 
   return data as GetEventResponse;
 };
 
-const useGetEvent = (req: GetEventRequest) => {
+const useGetEvent = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["useGetEvent"],
-    queryFn: () => GetEvent(req),
+    queryFn: () => GetEvent(),
   });
 
   if (error) {

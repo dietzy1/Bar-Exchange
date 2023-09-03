@@ -1,10 +1,10 @@
 /** @format */
 
 import httpMock from "@/api/axios.mock";
-import { GetEventResponse } from "@/api/protos/v1/event/event_pb";
+import { GetEventResponse } from "@/api/protos/event/v1/event_pb";
 
 //sconst url = new RegExp(/v1\/event\/\d+$/);
-const url = new RegExp(/v1\/event\//); //I hate fucking regexes
+const url = new RegExp(/v1\/event/); //I hate fucking regexes
 httpMock.onGet(url).reply(() => {
   //Date time as string in rfc3339 format 30min from now
   const now = new Date();
