@@ -1,16 +1,25 @@
 /** @format */
 /// <reference types="nativewind/types" />
 
+import { NavigationContainer } from "@react-navigation/native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
+import Navbar from "./routes/routes";
+import ReactQueryClientProvider from "./api/queryClient";
 
 export default function App() {
   return (
-    <View className="flex justify-center self-center my-auto">
-      <Text className="text-red-500">
-        Open up App.tsx to start working on your app!
-      </Text>
-    </View>
+    <SafeAreaProvider>
+      <ReactQueryClientProvider>
+        <NavigationContainer>
+          <Navbar />
+        </NavigationContainer>
+      </ReactQueryClientProvider>
+    </SafeAreaProvider>
   );
 }
 

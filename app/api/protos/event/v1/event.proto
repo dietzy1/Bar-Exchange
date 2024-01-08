@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package event.v1;
+
+service EventService {
+  rpc StartEvent(StartEventRequest) returns (StartEventResponse) {}
+
+  rpc StopEvent(StopEventRequest) returns (StopEventResponse) {}
+
+  rpc GetEvent(GetEventRequest) returns (GetEventResponse) {}
+}
+
+message StartEventRequest {
+  string future_timestamp = 1;
+}
+
+message StartEventResponse {
+  string id = 1;
+  int64 duration = 2;
+}
+
+message StopEventRequest {
+  string id = 1;
+}
+
+message StopEventResponse {}
+
+message GetEventRequest {}
+
+message GetEventResponse {
+  string id = 1;
+  string future_timestamp = 2;
+}

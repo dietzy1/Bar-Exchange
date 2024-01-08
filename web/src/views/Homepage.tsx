@@ -23,10 +23,13 @@ const Homepage = () => {
 
   const { lastJsonMessage, isWebSocketReady } = useWebsocket();
 
-  const beerData = data?.beverages.filter((beverage) => {
+  let beerData = data?.beverages.filter((beverage) => {
     //Map beverageType to the correct enum number
     return beverage.type.toString() === "BEVERAGE_TYPE_BEER";
   });
+
+ 
+
 
   const cocktailData = data?.beverages.filter((beverage) => {
     //Map beverageType to the correct enum number
